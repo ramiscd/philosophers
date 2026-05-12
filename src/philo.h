@@ -5,6 +5,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <pthread.h>
+# include <sys/time.h>
 
 typedef struct s_philo
 {
@@ -27,6 +28,7 @@ typedef struct s_data
 	pthread_mutex_t *forks;
 	pthread_mutex_t write_lock;
 	t_philo         *philos;
+	long            start_time;
 }	t_data;
 
 /* --- Prototypes --- */
@@ -34,5 +36,6 @@ int		init_mutexes(t_data *data);
 int		init_args(t_data *data, int argc, char **argv);
 void	cleanup(t_data *data);
 int		init_philos(t_data *data);
+long	get_time(void);
 
 #endif

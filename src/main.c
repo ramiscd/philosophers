@@ -75,12 +75,14 @@ int	main(int argc, char **argv)
 		return (printf("Error: Invalid values\n"), 1);
 	if (init_mutexes(&data))
 		return (printf("Error: Mutex init failed\n"), 1);
-	
-	printf("Mutexes initialized for %d philos.\n", data.philo_num);
 	if (init_philos(&data))
 		return (printf("Error: Philo init failed\n"), cleanup(&data), 1);
 	
-	printf("Philosophers and forks linked successfully.\n");
+	data.start_time = get_time();
+
+	printf("Sim started at: %ld ms\n", data.start_time);
+	usleep(50000); // Wait 50ms
+	printf("Time passed: %ld ms\n", get_time() - data.start_time);
 	
 	cleanup(&data);
 	return (0);
