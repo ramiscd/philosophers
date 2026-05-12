@@ -1,6 +1,27 @@
 #include "../src/philo.h"
 
 /**
+ * @brief Logic for eating. Forks are locked and timestamps updated.
+ * @param philo: Current philosopher thread data.
+ * @role Handles mutex locking for forks and updates last_meal time.
+ */
+void	philo_eat(t_philo *philo)
+{
+	pthread_mutex_lock(philo->left_fork);
+	print_status(philo, "has taken a fork");
+	pthread_mutex_lock(philo->right_fork);
+	print_status(philo, "has taken a fork");
+	
+	print_status(philo, "is eating");
+	philo->last_meal = get_time(); // Critical for death check later
+	ft_usleep(philo->data->time_to_eat);
+	philo->meals_eaten++;
+	
+	pthread_mutex_unlock(philo->right_fork);
+	pthread_mutex_unlock(philo->left_fork);
+}
+
+/**
  * @brief The main loop for each philosopher thread.
  * @param arg: Pointer to the specific t_philo struct.
  * @return NULL.
@@ -12,11 +33,14 @@ void	*routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	if (philo->id % 2 == 0)
+		ft_usleep(10); // Simple trick to prevent deadlock
 	
-	// Print birth
-	pthread_mutex_lock(&philo->data->write_lock);
-	printf("%ld %d is thinking\n", get_time() - philo->data->start_time, philo->id);
-	pthread_mutex_unlock(&philo->data->write_lock);
+	// Por enquanto, vamos fazer apenas 1 ciclo para testar
+	philo_eat(philo);
+	print_status(philo, "is sleeping");
+	ft_usleep(philo->data->time_to_sleep);
+	print_status(philo, "is thinking");
 	
 	return (NULL);
 }

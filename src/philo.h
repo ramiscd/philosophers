@@ -39,5 +39,8 @@ int		init_philos(t_data *data);
 long	get_time(void);
 int		start_simulation(t_data *data);
 void	*routine(void *arg);
+void	philo_eat(t_philo *philo);
+void	ft_usleep(long time_in_ms);
+void	print_status(t_philo *philo, char *str);
 
 #endif
