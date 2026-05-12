@@ -21,6 +21,15 @@ void	philo_eat(t_philo *philo)
 	pthread_mutex_unlock(philo->left_fork);
 }
 
+int check_death(t_data *data)
+{
+	int res;
+	pthread_mutex_lock(&data->dead_lock);
+	res = data->dead_flag;
+	pthread_mutex_unlock(&data->dead_lock);
+	return (res);
+}
+
 /**
  * @brief The main loop for each philosopher thread.
  * @param arg: Pointer to the specific t_philo struct.
@@ -28,20 +37,23 @@ void	philo_eat(t_philo *philo)
  * @example pthread_create(&thread, NULL, &routine, &philo);
  * @role Executes the cycle of eating, sleeping, and thinking.
  */
-void	*routine(void *arg)
+void    *routine(void *arg)
 {
-	t_philo	*philo;
+	t_philo *philo;
 
 	philo = (t_philo *)arg;
 	if (philo->id % 2 == 0)
-		ft_usleep(10); // Simple trick to prevent deadlock
+		ft_usleep(1);
 	
-	// Por enquanto, vamos fazer apenas 1 ciclo para testar
-	philo_eat(philo);
-	print_status(philo, "is sleeping");
-	ft_usleep(philo->data->time_to_sleep);
-	print_status(philo, "is thinking");
-	
+	while (!check_death(philo->data))
+	{
+		philo_eat(philo);
+		if (check_death(philo->data))
+			break ;
+		print_status(philo, "is sleeping");
+		ft_usleep(philo->data->time_to_sleep);
+		print_status(philo, "is thinking");
+	}
 	return (NULL);
 }
 
@@ -53,22 +65,23 @@ void	*routine(void *arg)
  */
 int	start_simulation(t_data *data)
 {
-	int	i;
+	pthread_t	monitor_thread;
+	int			i;
 
-	i = 0;
 	data->start_time = get_time();
-	while (i < data->philo_num)
+	// Create the Monitor thread first or after philos
+	if (pthread_create(&monitor_thread, NULL, &monitor_routine, data))
+		return (1);
+	i = -1;
+	while (++i < data->philo_num)
 	{
 		if (pthread_create(&data->philos[i].thread, NULL, &routine, &data->philos[i]))
 			return (1);
-		i++;
 	}
-	i = 0;
-	while (i < data->philo_num)
-	{
-		if (pthread_join(data->philos[i].thread, NULL))
-			return (1);
-		i++;
-	}
+	// Wait for the monitor to finish (it finishes when someone dies)
+	pthread_join(monitor_thread, NULL);
+	i = -1;
+	while (++i < data->philo_num)
+		pthread_join(data->philos[i].thread, NULL);
 	return (0);
 }

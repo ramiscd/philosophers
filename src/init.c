@@ -14,15 +14,13 @@ int	init_mutexes(t_data *data)
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->philo_num);
 	if (!data->forks)
 		return (1);
-	i = 0;
-	while (i < data->philo_num)
-	{
-		if (pthread_mutex_init(&data->forks[i], NULL))
-			return (1);
-		i++;
-	}
-	if (pthread_mutex_init(&data->write_lock, NULL))
-		return (1);
+	i = -1;
+	while (++i < data->philo_num)
+		pthread_mutex_init(&data->forks[i], NULL);
+	
+	// Inicializa os locks globais da mesa
+	pthread_mutex_init(&data->write_lock, NULL);
+	pthread_mutex_init(&data->dead_lock, NULL);
 	return (0);
 }
 
@@ -40,16 +38,22 @@ int	init_philos(t_data *data)
 	data->philos = malloc(sizeof(t_philo) * data->philo_num);
 	if (!data->philos)
 		return (1);
-	i = 0;
-	while (i < data->philo_num)
+	i = -1;
+	while (++i < data->philo_num)
 	{
 		data->philos[i].id = i + 1;
 		data->philos[i].meals_eaten = 0;
-		data->philos[i].last_meal = 0; // Will be updated at start
 		data->philos[i].data = data;
 		data->philos[i].left_fork = &data->forks[i];
 		data->philos[i].right_fork = &data->forks[(i + 1) % data->philo_num];
-		i++;
+		
+		// Inicializa o lock individual de cada filósofo
+		pthread_mutex_init(&data->philos[i].meal_lock, NULL);
+		
+		// IMPORTANTE: Inicializa last_meal aqui para evitar morte instantânea
+		data->philos[i].last_meal = get_time();
 	}
+	// Inicializa a flag de morte
+	data->dead_flag = 0;
 	return (0);
 }

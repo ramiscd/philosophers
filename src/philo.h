@@ -16,6 +16,7 @@ typedef struct s_philo
 	pthread_mutex_t *left_fork;
 	pthread_mutex_t *right_fork;
 	struct s_data   *data;
+	pthread_mutex_t meal_lock;
 }	t_philo;
 
 typedef struct s_data
@@ -29,6 +30,8 @@ typedef struct s_data
 	pthread_mutex_t write_lock;
 	t_philo         *philos;
 	long            start_time;
+	int             dead_flag;    // 0 para rodando, 1 para alguém morreu
+    pthread_mutex_t dead_lock;    // Protege a dead_flag
 }	t_data;
 
 /* --- Prototypes --- */
@@ -42,5 +45,7 @@ void	*routine(void *arg);
 void	philo_eat(t_philo *philo);
 void	ft_usleep(long time_in_ms);
 void	print_status(t_philo *philo, char *str);
+int			check_death(t_data *data);
+void		*monitor_routine(void *arg);
 
 #endif
