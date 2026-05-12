@@ -37,5 +37,7 @@ int		init_args(t_data *data, int argc, char **argv);
 void	cleanup(t_data *data);
 int		init_philos(t_data *data);
 long	get_time(void);
+int		start_simulation(t_data *data);
+void	*routine(void *arg);
 
 #endif
