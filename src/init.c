@@ -57,3 +57,29 @@ int	init_philos(t_data *data)
 	data->dead_flag = 0;
 	return (0);
 }
+
+/**
+ * @brief Destroys all mutexes and frees allocated memory.
+ * @param data: Pointer to the main data structure.
+ */
+void	cleanup(t_data *data)
+{
+	int	i;
+
+	i = -1;
+	if (data->forks)
+	{
+		while (++i < data->philo_num)
+			pthread_mutex_destroy(&data->forks[i]);
+		free(data->forks);
+	}
+	i = -1;
+	if (data->philos)
+	{
+		while (++i < data->philo_num)
+			pthread_mutex_destroy(&data->philos[i].meal_lock);
+		free(data->philos);
+	}
+	pthread_mutex_destroy(&data->write_lock);
+	pthread_mutex_destroy(&data->dead_lock);
+}

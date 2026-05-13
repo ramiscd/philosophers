@@ -47,22 +47,6 @@ int	init_args(t_data *data, int argc, char **argv)
 	return (0);
 }
 
-void	cleanup(t_data *data)
-{
-	int	i;
-
-	i = 0;
-	while (i < data->philo_num)
-	{
-		pthread_mutex_destroy(&data->forks[i]);
-		i++;
-	}
-	pthread_mutex_destroy(&data->write_lock);
-	free(data->forks);
-	if (data->philos)
-		free(data->philos);
-}
-
 int	main(int argc, char **argv)
 {
 	t_data	data;
