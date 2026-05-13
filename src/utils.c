@@ -30,14 +30,23 @@ void	ft_usleep(long time_in_ms)
 }
 
 /**
- * @brief Prints philosopher actions with timestamps.
- * @param philo: Current philosopher.
- * @param str: Action (e.g., "has taken a fork").
- * @role Thread-safe logging using write_lock.
+ * @brief Prints status messages only if simulation is running.
+ * @param philo: Philosopher structure.
+ * @param str: Action string.
+ * @example print_status(philo, "is eating") -> 200 1 is eating
+ * @role Centralizes logs and prevents printing after death.
  */
 void	print_status(t_philo *philo, char *str)
 {
+	pthread_mutex_lock(&philo->data->dead_lock);
+	if (philo->data->dead_flag)
+	{
+		pthread_mutex_unlock(&philo->data->dead_lock);
+		return ;
+	}
+	pthread_mutex_unlock(&philo->data->dead_lock);
 	pthread_mutex_lock(&philo->data->write_lock);
-	printf("%ld %d %s\n", get_time() - philo->data->start_time, philo->id, str);
+	printf("%ld %d %s\n", get_time() - philo->data->start_time,
+		philo->id, str);
 	pthread_mutex_unlock(&philo->data->write_lock);
 }

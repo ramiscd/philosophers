@@ -9,14 +9,20 @@ void	philo_eat(t_philo *philo)
 {
 	pthread_mutex_lock(philo->left_fork);
 	print_status(philo, "has taken a fork");
+	if (philo->data->philo_num == 1)
+	{
+		ft_usleep(philo->data->time_to_die);
+		pthread_mutex_unlock(philo->left_fork);
+		return ;
+	}
 	pthread_mutex_lock(philo->right_fork);
 	print_status(philo, "has taken a fork");
-	
 	print_status(philo, "is eating");
-	philo->last_meal = get_time(); // Critical for death check later
-	ft_usleep(philo->data->time_to_eat);
+	pthread_mutex_lock(&philo->meal_lock);
+	philo->last_meal = get_time();
 	philo->meals_eaten++;
-	
+	pthread_mutex_unlock(&philo->meal_lock);
+	ft_usleep(philo->data->time_to_eat);
 	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(philo->left_fork);
 }
