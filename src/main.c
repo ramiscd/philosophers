@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rdamasce <rdamasce@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/12 22:36:53 by rdamasce          #+#    #+#             */
+/*   Updated: 2026/05/12 22:43:19 by rdamasce         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../src/philo.h"
 
 /**
@@ -50,9 +62,9 @@ int	init_args(t_data *data, int argc, char **argv)
 int	main(int argc, char **argv)
 {
 	t_data	data;
-	data.forks = NULL;
-	data.philos = NULL; // Safety
 
+	data.forks = NULL;
+	data.philos = NULL;
 	if (argc < 5 || argc > 6)
 		return (printf("Error: Wrong arguments\n"), 1);
 	if (init_args(&data, argc, argv))
@@ -63,9 +75,7 @@ int	main(int argc, char **argv)
 		return (printf("Error: Philo init failed\n"), cleanup(&data), 1);
 	if (start_simulation(&data))
 		return (printf("Error: Thread creation failed\n"), cleanup(&data), 1);
-
 	data.start_time = get_time();
-
 	cleanup(&data);
 	return (0);
 }

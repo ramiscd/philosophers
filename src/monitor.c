@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rdamasce <rdamasce@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/12 22:37:06 by rdamasce          #+#    #+#             */
+/*   Updated: 2026/05/12 22:43:42 by rdamasce         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../src/philo.h"
 
 /**
@@ -36,9 +48,9 @@ static int	all_philos_full(t_data *data)
  * @return 1 if someone died, 0 otherwise.
  * @role Periodic check to enforce time_to_die.
  */
-static int  is_philo_dead(t_philo *philo)
+static int	is_philo_dead(t_philo *philo)
 {
-	long    time_since_last_meal;
+	long	time_since_last_meal;
 
 	pthread_mutex_lock(&philo->meal_lock);
 	time_since_last_meal = get_time() - philo->last_meal;

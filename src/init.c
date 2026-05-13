@@ -1,10 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rdamasce <rdamasce@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/12 22:36:48 by rdamasce          #+#    #+#             */
+/*   Updated: 2026/05/12 22:50:12 by rdamasce         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../src/philo.h"
 
 /**
  * @brief Initializes all mutexes for the simulation.
  * @param data: Pointer to the main data structure.
  * @return 0 on success, 1 on error.
- * @example init_mutexes(data) -> returns 0 if all 5 forks + write_lock are ready.
+ * @example init_mutexes(data) -> returns 0 if all 5
+ * forks + write_lock are ready.
  * @role Allocates memory for forks and initializes each as a mutex.
  */
 int	init_mutexes(t_data *data)
@@ -17,8 +30,6 @@ int	init_mutexes(t_data *data)
 	i = -1;
 	while (++i < data->philo_num)
 		pthread_mutex_init(&data->forks[i], NULL);
-	
-	// Inicializa os locks globais da mesa
 	pthread_mutex_init(&data->write_lock, NULL);
 	pthread_mutex_init(&data->dead_lock, NULL);
 	return (0);
@@ -46,14 +57,9 @@ int	init_philos(t_data *data)
 		data->philos[i].data = data;
 		data->philos[i].left_fork = &data->forks[i];
 		data->philos[i].right_fork = &data->forks[(i + 1) % data->philo_num];
-		
-		// Inicializa o lock individual de cada filósofo
 		pthread_mutex_init(&data->philos[i].meal_lock, NULL);
-		
-		// IMPORTANTE: Inicializa last_meal aqui para evitar morte instantânea
 		data->philos[i].last_meal = get_time();
 	}
-	// Inicializa a flag de morte
 	data->dead_flag = 0;
 	return (0);
 }

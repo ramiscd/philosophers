@@ -1,4 +1,30 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   threads.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rdamasce <rdamasce@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/12 22:37:23 by rdamasce          #+#    #+#             */
+/*   Updated: 2026/05/12 22:52:21 by rdamasce         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../src/philo.h"
+
+static void	lock_forks(t_philo *philo, pthread_mutex_t *f, pthread_mutex_t *s)
+{
+	pthread_mutex_lock(f);
+	print_status(philo, "has taken a fork");
+	if (philo->data->philo_num == 1)
+	{
+		ft_usleep(philo->data->time_to_die);
+		pthread_mutex_unlock(f);
+		return ;
+	}
+	pthread_mutex_lock(s);
+	print_status(philo, "has taken a fork");
+}
 
 /**
  * @brief Logic for eating. Forks are locked and timestamps updated.
@@ -10,27 +36,16 @@ void	philo_eat(t_philo *philo)
 	pthread_mutex_t	*first;
 	pthread_mutex_t	*second;
 
-	// Define a ordem dos garfos baseada no endereço de memória ou ID
-	if (philo->left_fork < philo->right_fork)
-	{
-		first = philo->left_fork;
-		second = philo->right_fork;
-	}
-	else
+	first = philo->left_fork;
+	second = philo->right_fork;
+	if (philo->left_fork > philo->right_fork)
 	{
 		first = philo->right_fork;
 		second = philo->left_fork;
 	}
-	pthread_mutex_lock(first);
-	print_status(philo, "has taken a fork");
+	lock_forks(philo, first, second);
 	if (philo->data->philo_num == 1)
-	{
-		ft_usleep(philo->data->time_to_die);
-		pthread_mutex_unlock(first);
 		return ;
-	}
-	pthread_mutex_lock(second);
-	print_status(philo, "has taken a fork");
 	print_status(philo, "is eating");
 	pthread_mutex_lock(&philo->meal_lock);
 	philo->last_meal = get_time();
@@ -41,9 +56,10 @@ void	philo_eat(t_philo *philo)
 	pthread_mutex_unlock(first);
 }
 
-int check_death(t_data *data)
+int	check_death(t_data *data)
 {
-	int res;
+	int	res;
+
 	pthread_mutex_lock(&data->dead_lock);
 	res = data->dead_flag;
 	pthread_mutex_unlock(&data->dead_lock);
@@ -57,14 +73,13 @@ int check_death(t_data *data)
  * @example pthread_create(&thread, NULL, &routine, &philo);
  * @role Executes the cycle of eating, sleeping, and thinking.
  */
-void    *routine(void *arg)
+void	*routine(void *arg)
 {
-	t_philo *philo;
+	t_philo	*philo;
 
 	philo = (t_philo *)arg;
 	if (philo->id % 2 == 0)
 		ft_usleep(1);
-	
 	while (!check_death(philo->data))
 	{
 		philo_eat(philo);
@@ -89,16 +104,15 @@ int	start_simulation(t_data *data)
 	int			i;
 
 	data->start_time = get_time();
-	// Create the Monitor thread first or after philos
 	if (pthread_create(&monitor_thread, NULL, &monitor_routine, data))
 		return (1);
 	i = -1;
 	while (++i < data->philo_num)
 	{
-		if (pthread_create(&data->philos[i].thread, NULL, &routine, &data->philos[i]))
+		if (pthread_create(&data->philos[i].thread, NULL,
+				&routine, &data->philos[i]))
 			return (1);
 	}
-	// Wait for the monitor to finish (it finishes when someone dies)
 	pthread_join(monitor_thread, NULL);
 	i = -1;
 	while (++i < data->philo_num)
